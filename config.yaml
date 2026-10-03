@@ -1,0 +1,63 @@
+# MalariaAI configuration. Paths are relative to the project root.
+# Override the dataset location without editing this file:
+#   PowerShell:  $env:MALARIA_DATA_DIR = "D:\path\to\cell_images"
+project:
+  name: MalariaAI
+  version: "0.1.0"
+
+paths:
+  data_dir: data/raw/cell_images      # must contain Parasitized/ and Uninfected/
+  splits_dir: data/splits
+  models_dir: models
+  checkpoints_dir: models/checkpoints
+  reports_dir: reports
+  project_reports_dir: project_reports
+  database_path: instance/malaria.db
+  upload_dir: instance/uploads
+
+classes:
+  names: [Uninfected, Parasitized]    # index 0 / 1; sigmoid output = P(Parasitized)
+  positive_class: Parasitized
+
+data:
+  image_size: 224                     # decided: same size for both models
+  channels: 3
+  resize_mode: pad_square             # pad_square | stretch (pad uses black, matching the cell background)
+  split:
+    train: 0.70
+    val: 0.15
+    test: 0.15
+    group_by: patient_id              # fallback: smear_id (filename prefix before _cell_N)
+    stratify: true
+
+training:
+  random_seed: 42
+  batch_size: 32
+  epochs: 30
+  learning_rate: 0.001
+  optimizer: adam
+  fine_tune_learning_rate: 0.00001
+  fine_tune_epochs: 10
+  early_stopping_patience: 5
+  reduce_lr_patience: 2
+  reduce_lr_factor: 0.5
+  model_name: custom_cnn              # custom_cnn | mobilenetv2 | efficientnetb0 | baseline_ref
+
+augmentation:                         # training data only
+  rotation_degrees: 20
+  horizontal_flip: true
+  vertical_flip: true                 # cells have no canonical orientation
+  zoom: 0.10
+  translation: 0.05
+  brightness: 0.10
+  contrast: 0.10
+
+inference:
+  threshold: 0.5                      # PLACEHOLDER until selected on validation data (Phase 12)
+  deployed_model: transfer_model      # decided in Phase 13; not yet evaluated
+
+web:
+  host: 127.0.0.1
+  port: 5000
+  upload_limit_mb: 5
+  allowed_extensions: [png, jpg, jpeg]

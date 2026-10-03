@@ -1,0 +1,17 @@
+# Output of scripts/verify_dataset.py, run by the user on their own machine on 2026-10-03 and pasted into the project chat.
+# Recorded verbatim. Folder Infected was separately counted by the user: 0 files.
+
+root_found: "D:\\CNN-Malaria-Detection-master\\data\\cell_images"
+classes: ["Parasitized", "Uninfected"]
+per_class: {"Parasitized": {"files_total": 13780, "images": 13779, "extensions": {".png": 13779}}, "Uninfected": {"files_total": 13780, "images": 13779, "extensions": {".png": 13779}}}
+other_folders_in_root: ["Infected"]
+total_images: 27558
+class_ratio_parasitized_to_uninfected: 1.0
+non_image_files: {"Parasitized:.db": 1, "Uninfected:.db": 1}
+corrupted: {"count": 0, "examples": []}
+formats: {"PNG": 27558}
+color_modes: {"RGB": 27558}
+image_size: {"unique_sizes": 1627, "width": {"min": 46, "max": 394, "median": 130.0}, "height": {"min": 40, "max": 385, "median": 130.0}, "most_common": [[[130, 130], 224], [[127, 124], 200], [[127, 130], 199], [[124, 124], 191], [[124, 127], 187]]}
+exact_duplicates: {"groups": 0, "extra_copies": 0, "groups_spanning_both_classes": 0, "examples":[]}
+smear_key_check: {"filenames_matching_pattern": 1408, "smear_groups": 1408, "groups_in_both_classes": 936}
+pixel_stats_sample_64px: {"n_images": 600, "mean_rgb": [0.5234, 0.4107, 0.4454], "std_rgb": [0.3348, 0.2658, 0.2832]}

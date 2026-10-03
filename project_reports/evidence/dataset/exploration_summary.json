@@ -1,0 +1,300 @@
+{
+  "generated_utc": "2026-10-03T14:55:56+00:00",
+  "seed": 42,
+  "dataset_dir_name": "cell_images",
+  "discovery": {
+    "per_class": {
+      "Uninfected": {
+        "files_total": 13780,
+        "images": 13779,
+        "extensions": {
+          ".png": 13779,
+          ".db": 1
+        }
+      },
+      "Parasitized": {
+        "files_total": 13780,
+        "images": 13779,
+        "extensions": {
+          ".png": 13779,
+          ".db": 1
+        }
+      }
+    },
+    "other_folders": [],
+    "images_on_disk": 27558,
+    "manifest_rows": 27558,
+    "disk_not_in_manifest": 0,
+    "manifest_not_on_disk": 0
+  },
+  "integrity": {
+    "unreadable": 0,
+    "unreadable_examples": [],
+    "formats": {
+      "PNG": 27558
+    },
+    "modes": {
+      "RGB": 27558
+    },
+    "grayscale_like_images": 0,
+    "pixel_value_range": [
+      0.0,
+      255.0
+    ]
+  },
+  "dimensions": {
+    "width": {
+      "min": 46.0,
+      "p5": 103.0,
+      "median": 130.0,
+      "mean": 132.48715436533857,
+      "p95": 166.0,
+      "max": 394.0
+    },
+    "height": {
+      "min": 40.0,
+      "p5": 103.0,
+      "median": 130.0,
+      "mean": 132.9834530807751,
+      "p95": 169.0,
+      "max": 385.0
+    },
+    "aspect_w_over_h": {
+      "min": 0.4578313253012048,
+      "p5": 0.7841726618705036,
+      "median": 1.0,
+      "mean": 1.0072590478576133,
+      "p95": 1.2560975609756098,
+      "max": 2.5949367088607596
+    },
+    "by_class": {
+      "Parasitized": {
+        "width_median": 133.0,
+        "height_median": 133.0,
+        "aspect_median": 1.0
+      },
+      "Uninfected": {
+        "width_median": 130.0,
+        "height_median": 130.0,
+        "aspect_median": 1.0
+      }
+    },
+    "unique_sizes": 1627,
+    "fraction_non_square_gt10pct": 0.41113288337324916,
+    "extreme_aspect_count": 133,
+    "smaller_than_64px_count": 20,
+    "fraction_smaller_than_224_both_sides": 0.9974599027505624
+  },
+  "duplicates": {
+    "exact_md5_groups": 0,
+    "exact_md5_groups_crossing_splits": 0,
+    "exact_examples": [],
+    "ahash_candidate_groups": 0,
+    "ahash_candidate_images": 0,
+    "ahash_candidates_crossing_splits": 0,
+    "ahash_candidates_crossing_classes": 0,
+    "note": "Candidates = identical 16x16 average hash and identical image size. They need visual review; they are not proof of duplication."
+  },
+  "class_distribution": {
+    "table": [
+      {
+        "split": "train",
+        "Parasitized": 9823,
+        "Uninfected": 9936,
+        "total": 19759,
+        "parasitized_fraction": 0.4971,
+        "patients": 144
+      },
+      {
+        "split": "val",
+        "Parasitized": 1945,
+        "Uninfected": 1923,
+        "total": 3868,
+        "parasitized_fraction": 0.5028,
+        "patients": 28
+      },
+      {
+        "split": "test",
+        "Parasitized": 2011,
+        "Uninfected": 1920,
+        "total": 3931,
+        "parasitized_fraction": 0.5116,
+        "patients": 28
+      }
+    ],
+    "patients_total": 200,
+    "patients_with_both_classes": 150,
+    "patients_only_parasitized": 0,
+    "patients_only_uninfected": 50,
+    "images_per_patient": {
+      "min": 65.0,
+      "p5": 67.0,
+      "median": 85.5,
+      "mean": 137.79,
+      "p95": 397.54999999999984,
+      "max": 702.0
+    }
+  },
+  "pixel_statistics": {
+    "computed_on": "train split only",
+    "channel_mean_0_255": [
+      134.13418385508908,
+      107.5609511441884,
+      115.04978455338427
+    ],
+    "channel_std_0_255": [
+      87.56724079569749,
+      71.21984971518623,
+      75.07002242024915
+    ],
+    "channel_mean_0_1": [
+      0.5260164072748591,
+      0.4218076515458368,
+      0.45117562569954617
+    ],
+    "channel_std_0_1": [
+      0.34340094429685286,
+      0.27929352829484794,
+      0.29439224478529075
+    ],
+    "per_class_train_means": [
+      {
+        "class": "Parasitized",
+        "mean_r": 133.28,
+        "mean_g": 103.18,
+        "mean_b": 113.24,
+        "brightness": 113.33,
+        "contrast": 72.34,
+        "black_frac": 0.29
+      },
+      {
+        "class": "Uninfected",
+        "mean_r": 135.41,
+        "mean_g": 112.97,
+        "mean_b": 119.53,
+        "brightness": 120.43,
+        "contrast": 74.24,
+        "black_frac": 0.28
+      }
+    ],
+    "patient_brightness": {
+      "min": 97.70671247450898,
+      "median": 119.28621557844188,
+      "max": 133.5777242786923,
+      "std": 7.183052158406057
+    },
+    "black_fraction_median": 0.2699357400578488,
+    "images_over_50pct_black": 222
+  },
+  "shortcut_check": {
+    "computed_on": "train split only",
+    "table": [
+      {
+        "feature": "mean_g",
+        "auc_parasitized_higher": 0.3117,
+        "distance_from_0.5": 0.1883
+      },
+      {
+        "feature": "brightness",
+        "auc_parasitized_higher": 0.3273,
+        "distance_from_0.5": 0.1727
+      },
+      {
+        "feature": "mean_b",
+        "auc_parasitized_higher": 0.3874,
+        "distance_from_0.5": 0.1126
+      },
+      {
+        "feature": "contrast",
+        "auc_parasitized_higher": 0.4206,
+        "distance_from_0.5": 0.0794
+      },
+      {
+        "feature": "black_frac",
+        "auc_parasitized_higher": 0.5654,
+        "distance_from_0.5": 0.0654
+      },
+      {
+        "feature": "mean_r",
+        "auc_parasitized_higher": 0.4654,
+        "distance_from_0.5": 0.0346
+      },
+      {
+        "feature": "height",
+        "auc_parasitized_higher": 0.5278,
+        "distance_from_0.5": 0.0278
+      },
+      {
+        "feature": "area",
+        "auc_parasitized_higher": 0.5242,
+        "distance_from_0.5": 0.0242
+      },
+      {
+        "feature": "width",
+        "auc_parasitized_higher": 0.5181,
+        "distance_from_0.5": 0.0181
+      },
+      {
+        "feature": "aspect",
+        "auc_parasitized_higher": 0.4901,
+        "distance_from_0.5": 0.0099
+      }
+    ]
+  },
+  "split_summary_from_splitter": {
+    "seed": 42,
+    "group_col": "patient_id",
+    "total_images": 27558,
+    "groups_total": 200,
+    "patient_id_parsed_for_all_files": true,
+    "files_using_smear_fallback": 0,
+    "group_overlap_between_splits": 0,
+    "splits": {
+      "train": {
+        "images": 19759,
+        "ratio": 0.717,
+        "groups": 144,
+        "parasitized": 9823,
+        "uninfected": 9936,
+        "parasitized_fraction": 0.4971
+      },
+      "val": {
+        "images": 3868,
+        "ratio": 0.1404,
+        "groups": 28,
+        "parasitized": 1945,
+        "uninfected": 1923,
+        "parasitized_fraction": 0.5028
+      },
+      "test": {
+        "images": 3931,
+        "ratio": 0.1426,
+        "groups": 28,
+        "parasitized": 2011,
+        "uninfected": 1920,
+        "parasitized_fraction": 0.5116
+      }
+    }
+  },
+  "leakage_verification": {
+    "passed": true,
+    "checks": {
+      "independent_patient_id_overlap_train_val": 0,
+      "independent_patient_id_overlap_train_test": 0,
+      "independent_patient_id_overlap_val_test": 0,
+      "smear_overlap_train_val": 0,
+      "smear_overlap_train_test": 0,
+      "smear_overlap_val_test": 0,
+      "path_overlap_any": 0,
+      "images_in_splits": 27558,
+      "unique_images_in_splits": 27558,
+      "splits_cover_all_disk_images": true,
+      "manifest_split_column_matches_split_files": true,
+      "INFO_base_id_overlap_(letter-suffix variants)_train_val": 0,
+      "INFO_base_id_overlap_train_test": 0,
+      "INFO_base_id_overlap_val_test": 0,
+      "split_summary_matches_csvs": true
+    },
+    "interpretation_of_INFO": "Non-zero INFO overlap means IDs differing only by a trailing letter appear in different splits. This is only a leak if those IDs are the same person, which the filenames alone cannot establish."
+  }
+}

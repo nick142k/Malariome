@@ -1,0 +1,29 @@
+# Environments / caches
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+.env
+*.env
+
+# Data (dataset is large and has its own license; never commit images)
+data/raw/*
+data/processed/*
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+data/splits/*.tmp
+
+# Runtime artefacts
+instance/
+uploads/
+*.db
+models/checkpoints/
+*.h5
+
+# Local scratch
+dataset_report.json
+.DS_Store
+Thumbs.db
+project_reports/evidence/dataset/image_scan.csv

@@ -1,0 +1,7 @@
+feature,auc_all_train,auc_patients_with_both_classes,auc_within_patient_centred
+mean_g,0.3117,0.3516,0.3794
+brightness,0.3273,0.3641,0.4047
+mean_b,0.3874,0.45,0.4518
+mean_r,0.4654,0.4517,0.448
+contrast,0.4206,0.4287,0.4464
+black_frac,0.5654,0.5398,0.5263
