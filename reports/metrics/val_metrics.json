@@ -1,0 +1,72 @@
+{
+  "split": "val",
+  "models": {
+    "transfer_model": {
+      "images": 3868,
+      "patients": 28,
+      "parasitized": 1945,
+      "roc_auc": 0.9882067570620563,
+      "pr_auc": 0.9885503665696159,
+      "threshold_selected": 0.42,
+      "at_selected_threshold": {
+        "threshold": 0.42,
+        "accuracy": 0.9513960703205792,
+        "precision": 0.9526017516743946,
+        "recall": 0.950642673521851,
+        "sensitivity": 0.950642673521851,
+        "specificity": 0.9521580863234529,
+        "f1": 0.9516212043232115,
+        "tp": 1849,
+        "fp": 92,
+        "tn": 1831,
+        "fn": 96
+      },
+      "at_0.5": {
+        "threshold": 0.5,
+        "accuracy": 0.9493278179937953,
+        "precision": 0.9585736759307814,
+        "recall": 0.9398457583547558,
+        "sensitivity": 0.9398457583547558,
+        "specificity": 0.9589183567342694,
+        "f1": 0.9491173416407062,
+        "tp": 1828,
+        "fp": 79,
+        "tn": 1844,
+        "fn": 117
+      },
+      "ci95_patient_bootstrap": {
+        "roc_auc": {
+          "lo": 0.9818399184448533,
+          "hi": 0.9933458122706634
+        },
+        "pr_auc": {
+          "lo": 0.9758069777852505,
+          "hi": 0.9937517692473042
+        },
+        "accuracy": {
+          "lo": 0.9396852612342179,
+          "hi": 0.9650840476182954
+        },
+        "sensitivity": {
+          "lo": 0.9293757322458543,
+          "hi": 0.9642289456951774
+        },
+        "specificity": {
+          "lo": 0.9295686862184612,
+          "hi": 0.9712346855472467
+        },
+        "precision": {
+          "lo": 0.9093143507565515,
+          "hi": 0.9703917735945895
+        },
+        "f1": {
+          "lo": 0.9237668884728266,
+          "hi": 0.9645236852009902
+        },
+        "n_valid_resamples": 1000,
+        "n_patients": 28
+      },
+      "note": "threshold was selected on this same data, so results at the selected threshold are optimistic"
+    }
+  }
+}

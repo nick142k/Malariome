@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Model{% endblock %}
+{% block content %}
+<h1 class="page-title">Model card</h1>
+{% if meta %}
+<section class="card">
+  <h2>{{ meta.model_name or model_name or 'Deployed model' }}</h2>
+  <table class="kv">
+    {% if meta.model_version %}<tr><th>Version</th><td>{{ meta.model_version }}</td></tr>{% endif %}
+    {% if meta.input_size %}<tr><th>Input size</th><td>{{ meta.input_size }} × {{ meta.input_size }} RGB</td></tr>{% endif %}
+    {% if meta.class_names %}<tr><th>Classes</th><td>{{ meta.class_names|join(', ') }}</td></tr>{% endif %}
+    {% if meta.preprocessing %}<tr><th>Preprocessing</th><td>{{ meta.preprocessing.resize_mode }}, scaling {{ meta.preprocessing.scaling }}</td></tr>{% endif %}
+    {% if meta.threshold is not none and meta.threshold is defined %}<tr><th>Decision threshold</th><td>{{ meta.threshold }} (selected on validation data)</td></tr>{% endif %}
+    {% if meta.random_seed is defined %}<tr><th>Random seed</th><td>{{ meta.random_seed }}</td></tr>{% endif %}
+  </table>
+</section>
+{% else %}<div class="flash info">Model metadata file not found.</div>{% endif %}
+{% for split, label in [('val', 'Validation'), ('test', 'Final test (held out)')] %}
+<section class="card">
+  <h2>{{ label }} performance</h2>
+  {% set rep = reports[split] %}
+  {% if rep and rep.models %}
+  <div class="table-scroll"><table class="data">
+    <thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>Specificity</th><th>F1</th><th>ROC-AUC</th><th>PR-AUC</th></tr></thead>
+    <tbody>
+    {% for name, m in rep.models.items() %}{% set t = m.at_selected_threshold %}
+      <tr><td>{{ name }}</td>
+        <td>{{ '%.3f'|format(t.accuracy) }}</td><td>{{ '%.3f'|format(t.precision) }}</td><td>{{ '%.3f'|format(t.recall) }}</td>
+        <td>{{ '%.3f'|format(t.specificity) }}</td><td>{{ '%.3f'|format(t.f1) }}</td><td>{{ '%.3f'|format(m.roc_auc) }}</td><td>{{ '%.3f'|format(m.pr_auc) }}</td></tr>
+    {% endfor %}
+    </tbody></table></div>
+  <p class="muted small">Threshold-dependent values use each model's selected decision threshold.{% if split == 'val' %} Thresholds were selected on this validation data, so these numbers are optimistic.{% endif %}</p>
+  {% else %}<p class="muted">NOT YET EVALUATED (no results file found).</p>{% endif %}
+</section>
+{% endfor %}
+{% endblock %}

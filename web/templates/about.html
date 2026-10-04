@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
+<h1 class="page-title">About MalariaAI</h1>
+<section class="card prose">
+  <p>MalariaAI is an academic research project that screens microscopic blood-cell images for malaria parasites with deep learning
+  and explains its output with Grad-CAM. It classifies a single cell image as <strong>Parasitized</strong> or <strong>Uninfected</strong>.</p>
+  <h2>Method in brief</h2>
+  <ul>
+    <li>Trained on the public Kaggle dataset "Cell Images for Detecting Malaria", using a patient-level split so that cells from one patient never appear in more than one of train, validation and test.</li>
+    <li>A custom CNN trained from scratch was compared with a fine-tuned MobileNetV2 transfer-learning model.</li>
+    <li>The decision threshold was chosen on validation data only; the test set was kept locked until the final evaluation.</li>
+  </ul>
+  <h2>Limitations</h2>
+  <ul>
+    <li>Not clinically validated and not a diagnostic device.</li>
+    <li>Trained on one dataset: other microscopes, stains, preparations or image qualities may behave differently.</li>
+    <li>Designed for single-cell crops, not whole slides.</li>
+  </ul>
+  <h2>Attribution</h2>
+  <p>Reference baseline: <em>afloresep/CNN-Malaria-Detection</em> (used as a reference only; this implementation is new). Dataset: Kaggle, "Cell Images for Detecting Malaria".</p>
+  <h2>Privacy</h2>
+  <p>The history stores only the file name, the model output, the threshold, the model version and a timestamp. Uploaded images are deleted automatically.</p>
+  <p class="notice"><strong>{{ disclaimer }}</strong></p>
+</section>
+{% endblock %}

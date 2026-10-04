@@ -1,0 +1,24 @@
+{
+  "model": "MobileNetV2",
+  "task": "malaria_species_classification",
+  "classes": [
+    "Falciparum",
+    "Malariae",
+    "Ovale",
+    "Vivax"
+  ],
+  "image_size": [
+    224,
+    224
+  ],
+  "batch_size": 32,
+  "validation_split": 0.2,
+  "seed": 42,
+  "class_weights": {
+    "0": 0.2939356435643564,
+    "1": 6.361607142857143,
+    "2": 8.284883720930232,
+    "3": 3.125
+  },
+  "learning_rate": 0.0001
+}

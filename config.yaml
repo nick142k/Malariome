@@ -29,6 +29,11 @@ data:
     test: 0.15
     group_by: patient_id              # fallback: smear_id (filename prefix before _cell_N)
     stratify: true
+  scaling_by_model:
+    custom_cnn: unit
+    baseline_ref: unit
+    mobilenetv2: minus1_1
+    efficientnetb0: none
 
 training:
   random_seed: 42

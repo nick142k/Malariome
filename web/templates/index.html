@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">MALARIA AI</p>
+  <h1>AI-Assisted Malaria Screening</h1>
+  <p class="lead">Upload Microscopic Blood Cell Image</p>
+</section>
+{% if not model_ready %}<div class="flash error">The model is not loaded, so predictions are unavailable right now.</div>{% endif %}
+<form id="upload-form" class="card upload" action="{{ url_for('predict') }}" method="post" enctype="multipart/form-data">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <div id="dropzone" class="dropzone" tabindex="0" data-max-mb="{{ max_mb }}">
+    <img id="preview" class="preview" alt="Selected image preview" hidden>
+    <div id="drop-text">
+      <div class="drop-icon">⬆</div>
+      <p><strong>Drag &amp; Drop</strong> a cell image here</p>
+      <p class="muted">or use the button below</p>
+    </div>
+  </div>
+  <input id="file-input" type="file" name="image" accept=".png,.jpg,.jpeg,image/png,image/jpeg" hidden>
+  <p id="file-name" class="muted center" aria-live="polite"></p>
+  <div class="actions">
+    <button type="button" id="choose" class="btn ghost">Choose Image</button>
+    <button type="submit" id="analyze" class="btn primary" disabled>Analyze Image</button>
+  </div>
+  <p class="muted center small">{{ allowed|join(', ')|upper }} · up to {{ max_mb }} MB · single-cell crops (like the training images) work best.</p>
+</form>
+{% endblock %}

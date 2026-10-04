@@ -28,3 +28,8 @@ dataset_report.json
 Thumbs.db
 project_reports/evidence/dataset/image_scan.csv
 data/
+backup/
+
+# Local backups and generated smoke-test artifacts
+backup/
+reports/smoke/

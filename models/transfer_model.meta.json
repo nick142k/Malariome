@@ -1,0 +1,41 @@
+{
+  "model_name": "mobilenetv2",
+  "model_version": "0.1-EXP-002",
+  "experiment": "EXP-002",
+  "input_size": 224,
+  "class_names": [
+    "Uninfected",
+    "Parasitized"
+  ],
+  "positive_class": "Parasitized",
+  "preprocessing": {
+    "image_size": 224,
+    "channels": 3,
+    "resize_mode": "pad_square",
+    "padding": "black",
+    "interpolation": "bilinear",
+    "scaling": "minus1_1",
+    "color_mode": "RGB"
+  },
+  "optimizer": "adam",
+  "learning_rate": {
+    "head": 0.001,
+    "fine_tune": 1e-05
+  },
+  "chosen_stage": "stage2",
+  "best_epoch_global": 10,
+  "random_seed": 42,
+  "threshold": null,
+  "threshold_note": "not selected yet (validation data only)",
+  "interrupted_run": true,
+  "validation_metrics_at_best_epoch": {
+    "val_loss": 0.1425468921661377,
+    "val_accuracy": 0.949327826499939,
+    "val_precision": 0.9585736989974976,
+    "val_recall": 0.9398457407951356,
+    "val_auc": 0.987987458705902,
+    "val_pr_auc": 0.9873692393302916
+  },
+  "tensorflow": "2.20.0",
+  "keras": "3.13.2"
+}

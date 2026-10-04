@@ -1,0 +1,24 @@
+{
+  "custom_cnn": {
+    "threshold": 0.44,
+    "rule": "highest validation specificity among thresholds with validation sensitivity >= 0.95 (fallback: highest F1 if the target is unreachable)",
+    "target_sensitivity": 0.95,
+    "fallback_max_f1": false,
+    "val_sensitivity": 0.9511568123393316,
+    "val_specificity": 0.907436297451898,
+    "val_f1": 0.9312861817266549,
+    "selected_on": "validation",
+    "date": "2026-10-04"
+  },
+  "transfer_model": {
+    "threshold": 0.42,
+    "rule": "highest validation specificity among thresholds with validation sensitivity >= 0.95 (fallback: highest F1 if the target is unreachable)",
+    "target_sensitivity": 0.95,
+    "fallback_max_f1": false,
+    "val_sensitivity": 0.950642673521851,
+    "val_specificity": 0.9521580863234529,
+    "val_f1": 0.9516212043232115,
+    "selected_on": "validation",
+    "date": "2026-10-04"
+  }
+}

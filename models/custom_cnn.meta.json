@@ -1,0 +1,37 @@
+{
+  "model_name": "custom_cnn",
+  "model_version": "0.1-EXP-001",
+  "experiment": "EXP-001",
+  "input_size": 224,
+  "class_names": [
+    "Uninfected",
+    "Parasitized"
+  ],
+  "positive_class": "Parasitized",
+  "preprocessing": {
+    "image_size": 224,
+    "channels": 3,
+    "resize_mode": "pad_square",
+    "padding": "black",
+    "interpolation": "bilinear",
+    "scaling": "unit",
+    "color_mode": "RGB"
+  },
+  "optimizer": "adam",
+  "learning_rate": 0.001,
+  "epochs_run": 10,
+  "best_epoch": 8,
+  "random_seed": 42,
+  "threshold": null,
+  "threshold_note": "not selected yet (Phase 12, validation data only)",
+  "validation_metrics_at_best_epoch": {
+    "val_loss": 0.19006337225437164,
+    "val_accuracy": 0.9307135343551636,
+    "val_precision": 0.9173718094825745,
+    "val_recall": 0.9475578665733337,
+    "val_auc": 0.9797506928443909,
+    "val_pr_auc": 0.9796947240829468
+  },
+  "tensorflow": "2.20.0",
+  "keras": "3.15.1"
+}

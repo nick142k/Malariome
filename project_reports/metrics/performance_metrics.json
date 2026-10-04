@@ -1,0 +1,15 @@
+{
+  "transfer_model": {
+    "CPU": {
+      "device": "CPU",
+      "parameters": 2259265,
+      "model_size_mb": 21.73,
+      "single_image_ms_mean": 258.93,
+      "single_image_ms_median": 243.83,
+      "batch32_ms_per_image": 113.9,
+      "timing_runs_single": 30,
+      "preprocessing_included": false,
+      "tensorflow": "2.20.0"
+    }
+  }
+}

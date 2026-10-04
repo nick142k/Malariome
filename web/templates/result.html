@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Result{% endblock %}
+{% block content %}
+{% set pos = r.prediction|upper == 'PARASITIZED' %}
+<h1 class="page-title">Screening result</h1>
+<div class="grid two">
+  <section class="card">
+    <h2>Uploaded image</h2>
+    <img class="cell" src="{{ image }}" alt="Uploaded blood cell image">
+    <p class="muted small">{{ filename }}</p>
+  </section>
+  <section class="card">
+    <h2>Prediction</h2>
+    <div class="badge {{ 'pos' if pos else 'neg' }}">{{ r.prediction|upper }}</div>
+    <p class="label">Probability of parasitization</p>
+    <div class="meter" role="img" aria-label="Probability {{ (r.malaria_probability*100)|round(1) }} percent">
+      <div class="fill {{ 'pos' if pos else 'neg' }}" style="width: {{ (r.malaria_probability*100)|round(1) }}%"></div>
+      <div class="mark" style="left: {{ (r.threshold*100)|round(1) }}%" title="decision threshold"></div>
+    </div>
+    <p class="big">{{ (r.malaria_probability*100)|round(1) }}%</p>
+    <table class="kv">
+      <tr><th>Decision threshold</th><td>{{ '%.2f'|format(r.threshold) }}</td></tr>
+      <tr><th>Model</th><td>{{ r.model }}</td></tr>
+      <tr><th>Model version</th><td>{{ r.model_version }}</td></tr>
+    </table>
+    {% if r.species %}
+    <div class="species">
+      <h3>Species estimate <span class="tag">research</span></h3>
+      <p class="big small-big">{{ r.species }}{% if r.species_probability is not none %} · {{ (r.species_probability*100)|round(1) }}%{% endif %}</p>
+      <p class="muted small">Species output comes from a separate research model and is shown only when the cell is flagged as parasitized.</p>
+    </div>
+    {% endif %}
+  </section>
+</div>
+{% if gradcam %}
+<section class="card">
+  <h2>Grad-CAM explanation</h2>
+  <div class="grid three">
+    <figure><img class="cell" src="data:image/png;base64,{{ gradcam.original }}" alt="Original"><figcaption>Original</figcaption></figure>
+    <figure><img class="cell" src="data:image/png;base64,{{ gradcam.heatmap }}" alt="Heatmap"><figcaption>Heatmap</figcaption></figure>
+    <figure><img class="cell" src="data:image/png;base64,{{ gradcam.overlay }}" alt="Overlay"><figcaption>Overlay</figcaption></figure>
+  </div>
+  <p class="muted small">{{ gradcam_note }}</p>
+</section>
+{% endif %}
+<p class="center"><a class="btn primary" href="{{ url_for('index') }}">Analyze another image</a></p>
+{% endblock %}

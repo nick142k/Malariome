@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+{% block content %}
+<div class="row-between">
+  <h1 class="page-title">Prediction history</h1>
+  {% if total %}
+  <form method="post" action="{{ url_for('clear_history') }}" onsubmit="return confirm('Delete all saved predictions?');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn danger" type="submit">Clear history</button>
+  </form>
+  {% endif %}
+</div>
+<section class="card">
+  {% if rows %}
+  <div class="table-scroll">
+  <table class="data">
+    <thead><tr><th>#</th><th>Time (UTC)</th><th>File</th><th>Prediction</th><th>Probability</th><th>Threshold</th><th>Species</th><th>Model</th><th>Via</th></tr></thead>
+    <tbody>
+    {% for x in rows %}
+      <tr>
+        <td>{{ x.id }}</td><td>{{ x.timestamp }}</td><td class="trunc">{{ x.filename }}</td>
+        <td><span class="pill {{ 'pos' if x.predicted_class|upper == 'PARASITIZED' else 'neg' }}">{{ x.predicted_class }}</span></td>
+        <td>{{ (x.probability*100)|round(1) }}%</td><td>{{ '%.2f'|format(x.threshold) }}</td>
+        <td>{{ x.species or '—' }}</td><td>{{ x.model_version or '—' }}</td><td>{{ x.source }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}<p class="muted center">No predictions saved yet.</p>{% endif %}
+</section>
+<p class="muted small">Only the file name, result, threshold, model version and time are stored. Images are not kept in the history.</p>
+{% endblock %}

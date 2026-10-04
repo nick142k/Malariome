@@ -1,0 +1,426 @@
+MalariaAI — Development Progress Report
+
+Project: MalariaAI
+Repository: Malariome/malaria-detection
+Report date: 3 October 2026
+Current phase: GPU environment setup / training acceleration
+
+1. Overall Status
+
+The project has progressed from dataset preparation and validation into the first real model-training phase.
+
+The data pipeline has been verified end-to-end on the real malaria cell-image dataset. TensorFlow/Keras has also been installed and successfully exercised locally.
+
+The first CPU training run has completed Epoch 1 successfully.
+
+2. Dataset
+
+Dataset location:
+
+D:\CNN-Malaria-Detection-master\data\cell_images
+
+Dataset statistics:
+
+Total images: 27,558
+
+Parasitized: 13,779
+
+Uninfected: 13,779
+
+Classes are perfectly balanced.
+
+The dataset contains the expected:
+
+Parasitized/
+
+Uninfected/
+
+directories.
+
+3. Patient-Aware Splitting
+
+The splitter was corrected to use the patient identifier parsing rule:
+
+_PATIENT_RE = re.compile(r"^(C\d+(?:P\d+)?)N?(?=_|thin)", re.IGNORECASE)
+
+The final split was verified with patient-level grouping.
+
+Split	Images	Groups	Parasitized	Uninfected
+Train	19,759	144	9,823	9,936
+Validation	3,868	28	1,945	1,923
+Test	3,931	28	2,011	1,920
+Total	27,558	200	13,779	13,779
+
+Verification:
+
+Patient IDs parsed for all files: Yes
+
+Smear fallback: 0 files
+
+Group overlap between splits: 0
+
+Train/validation/test separation: PASS
+
+4. Split Manifests
+
+The following manifests are present and verified:
+
+data/splits/manifest.csv — 27,558 rows
+
+data/splits/train.csv — 19,759 rows
+
+data/splits/val.csv — 3,868 rows
+
+data/splits/test.csv — 3,931 rows
+
+Manifest columns:
+
+path, class, label, patient_id, smear_id, patient_parsed, split
+
+5. Image Preprocessing
+
+The shared preprocessing implementation is complete.
+
+Pipeline:
+
+Load image
+
+Validate image
+
+Convert to RGB
+
+Pad to square with black background
+
+Resize to 224 × 224
+
+Convert to float32
+
+Apply model-specific scaling
+
+Current configuration:
+
+Image size: 224 × 224
+
+Channels: 3
+
+Resize mode: pad_square
+
+Padding: black
+
+Interpolation: bilinear
+
+Color mode: RGB
+
+Real-image audit:
+
+Images audited: 27,558
+
+Failed: 0
+
+Status: PASS
+
+A real image was successfully verified as:
+
+Shape: (224, 224, 3)
+
+dtype: float32
+
+finite values: True
+
+6. TensorFlow / Data Pipeline
+
+TensorFlow was initially absent from the environment.
+
+TensorFlow was subsequently installed successfully.
+
+Current versions:
+
+Python: 3.11.9
+
+TensorFlow: 2.20.0
+
+Keras: 3.15.1
+
+NumPy: 2.4.6
+
+Pandas: 3.0.6
+
+Pillow: 12.3.0
+
+scikit-learn: 1.9.1
+
+TensorFlow tf.data integration was successfully tested.
+
+Verified batch:
+
+Shape: (32, 224, 224, 3)
+
+dtype: float32
+
+Pixel range after scaling: 0.0–1.0
+
+Labels shape: (32,)
+
+Both labels 0 and 1 observed
+
+7. Augmentation
+
+Training augmentation is implemented using Keras 3 preprocessing layers.
+
+Current augmentation layers successfully verified:
+
+Random horizontal + vertical flip
+
+Random rotation
+
+Random zoom
+
+Random translation
+
+Random brightness
+
+Random contrast
+
+Verified augmentation output:
+
+Batch shape: (32, 224, 224, 3)
+
+dtype: float32
+
+Pixel range: 0.0–1.0
+
+Labels preserved
+
+Both classes present
+
+Important design decision:
+
+Augmentation is applied before model-specific scaling.
+
+Validation and test data do not receive training augmentation.
+
+8. Model Sanity Check
+
+The model successfully accepted the expected input:
+
+(32, 224, 224, 3)
+
+Output:
+
+(32, 1)
+
+Initial untrained-model behavior:
+
+Output approximately 0.50
+
+Loss approximately 0.694
+
+This is consistent with an untrained binary classifier and confirms that the basic model/data interface works.
+
+9. First Training Run — CPU
+
+The first real training run was performed locally on the CPU.
+
+Hardware:
+
+CPU: Intel Core i5 10th generation
+
+RAM: 8 GB DDR4-3200
+
+GPU: NVIDIA GeForce GTX 1660 4 GB
+
+Epoch 1 result:
+
+Training precision: 0.7854
+
+Training recall: 0.5493
+
+Validation accuracy: 0.7213
+
+Validation AUC: 0.8747
+
+Validation loss: 0.5386
+
+Validation precision: 0.9943
+
+Validation recall: 0.4483
+
+Runtime:
+
+18.13 minutes / epoch
+
+Estimated 30-epoch runtime:
+
+approximately 9.06 hours
+
+The model is therefore learning meaningful signal already, but Epoch 1 is not sufficient to judge final performance.
+
+10. GPU Situation
+
+The machine has an NVIDIA GPU:
+
+GeForce GTX 1660 — 4 GB VRAM
+
+Current NVIDIA information:
+
+Driver: 516.40
+
+Reported CUDA version: 11.7
+
+GPU memory: 4096 MiB
+
+At the time of checking:
+
+GPU utilization: 0%
+
+GPU memory usage: 0 MiB
+
+No training process was using the GPU.
+
+The current TensorFlow installation has been tested on CPU, but GPU TensorFlow execution has not yet been verified.
+
+11. WSL Setup
+
+Because modern TensorFlow GPU support on Windows requires a Linux/WSL-based approach, WSL setup was started.
+
+Current status:
+
+WSL installed: Yes
+
+Virtual Machine Platform enabled: Yes
+
+Windows reboot: Required
+
+Linux distribution: Not yet installed
+
+WSL GPU test: Not yet performed
+
+The next step is therefore:
+
+Restart Windows.
+
+Install Ubuntu under WSL.
+
+Verify nvidia-smi inside WSL.
+
+Create a suitable Linux Python environment.
+
+Install/test TensorFlow GPU support.
+
+Run a short GPU benchmark.
+
+Compare GPU epoch time against the CPU baseline of 18.13 minutes/epoch.
+
+12. Testing Status
+
+Previously established automated tests:
+
+Repository structure: PASS
+
+Preprocessing tests: PASS
+
+Data-loader unit tests: PASS
+
+Augmentation tests: PASS
+
+Overall pytest suite: 28 passed
+
+Real-data validation:
+
+Dataset exists: PASS
+
+27,558 images discovered: PASS
+
+All real images audited: PASS
+
+Failed image loads: 0
+
+Patient-aware split: PASS
+
+Cross-split group overlap: 0
+
+TensorFlow:
+
+Installation: PASS
+
+Basic TensorFlow import: PASS
+
+tf.data pipeline: PASS
+
+Augmentation integration: PASS
+
+GPU execution: PENDING
+
+13. Remaining Major Work
+Current priority
+
+GPU training environment and benchmark
+
+After GPU setup
+
+Complete model training
+
+Save training checkpoints
+
+Select best checkpoint using validation performance
+
+Evaluate on the untouched test set
+
+Calculate:
+
+Accuracy
+
+Precision
+
+Recall
+
+F1
+
+ROC-AUC
+
+PR-AUC
+
+Confusion matrix
+
+Sensitivity/specificity as appropriate
+
+Later phases
+
+Compare custom CNN with transfer-learning models
+
+Threshold selection using validation data
+
+Final model selection
+
+Grad-CAM/explainability
+
+Inference pipeline
+
+Flask/API integration
+
+Upload validation
+
+End-to-end application testing
+
+Final project documentation
+
+14. Current Milestone
+
+Milestone reached: REAL DATA → VERIFIED PIPELINE → FIRST MODEL TRAINING
+
+The project is no longer blocked on missing data or an unverified data pipeline.
+
+The next technical milestone is:
+
+REAL DATA → GPU-ACCELERATED TRAINING → VALIDATION → TEST EVALUATION
+
+The CPU run provides a useful baseline of 18.13 minutes per epoch against which the GPU implementation can be measured.
+
+15. Immediate Next Command
+
+After rebooting Windows, start with:
+
+wsl -l -v
+
+
+Do not change the existing project or delete the current .venv. The GPU environment will be set up separately so the current working environment remains reproducible.
