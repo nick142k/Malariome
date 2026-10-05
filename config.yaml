@@ -58,6 +58,7 @@ augmentation:                         # training data only
   contrast: 0.10
 
 inference:
+  species_enabled: true
   threshold: 0.5                      # PLACEHOLDER until selected on validation data (Phase 12)
   deployed_model: transfer_model      # decided in Phase 13; not yet evaluated
 

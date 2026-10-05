@@ -1,36 +1,40 @@
 """
 MalariaAI inference adapter.
 
-Pipeline:
+Two-stage pipeline:
+
     Image
       |
       v
-Parasite detector (MobileNetV2 transfer_model)
+    MobileNetV2 parasite detector
       |
-      +---- UNINFECTED -> stop
+      +---- UNINFECTED
       |
-      +---- PARASITIZED -> species classifier
-                              |
-                              +-- Falciparum
-                              +-- Malariae
-                              +-- Ovale
-                              +-- Vivax
+      +---- PARASITIZED
+                |
+                v
+          Species classifier
+                |
+                +-- Falciparum
+                +-- Malariae
+                +-- Ovale
+                +-- Vivax
 
-This module provides the Predictor contract expected by app.py:
+Predictor contract:
 
     predictor.predict(image_bytes) -> dict
-    predictor.explain(image_bytes) -> optional dict
+    predictor.explain(image_bytes) -> dict
 """
 
 from __future__ import annotations
 
-import io
 import json
 from pathlib import Path
 
 import numpy as np
 import tensorflow as tf
-from PIL import Image
+
+from src.data.preprocessing import Preprocessor
 
 
 # ---------------------------------------------------------------------
@@ -51,8 +55,6 @@ SPECIES_META_PATH = MODELS_DIR / "species_model.meta.json"
 # Configuration
 # ---------------------------------------------------------------------
 
-IMAGE_SIZE = (224, 224)
-
 DEFAULT_PARASITE_THRESHOLD = 0.42
 
 SPECIES_CLASSES = [
@@ -68,47 +70,47 @@ SPECIES_CLASSES = [
 # ---------------------------------------------------------------------
 
 def _read_json(path: Path) -> dict:
+    """Read JSON metadata safely."""
+
     if not path.exists():
         return {}
 
     try:
-        return json.loads(path.read_text(encoding="utf-8"))
+        return json.loads(
+            path.read_text(
+                encoding="utf-8"
+            )
+        )
     except Exception:
         return {}
 
 
-def _load_image(image_bytes: bytes) -> np.ndarray:
+def _load_image(
+    image_bytes: bytes,
+    preprocessor: Preprocessor,
+) -> np.ndarray:
     """
-    Decode image bytes and convert to RGB float32 tensor.
+    Preprocess an uploaded image using the exact
+    preprocessing configuration used by training.
 
-    MobileNetV2 preprocessing is applied inside the model pipeline
-    for the species model. For the parasite model we use the same
-    224x224 RGB input convention.
+    Returns:
+        NumPy array with shape:
+
+            (1, 224, 224, 3)
     """
 
-    if not image_bytes:
-        raise ValueError("Image data is empty.")
+    array = preprocessor(
+        image_bytes
+    )
 
-    try:
-        image = Image.open(io.BytesIO(image_bytes))
-        image = image.convert("RGB")
-        image = image.resize(IMAGE_SIZE)
-    except Exception as exc:
-        raise ValueError("Unable to decode uploaded image.") from exc
-
-    array = np.asarray(image, dtype=np.float32)
-
-    # Add batch dimension.
-    return np.expand_dims(array, axis=0)
+    return np.expand_dims(
+        array,
+        axis=0,
+    )
 
 
 def _extract_threshold(meta: dict) -> float:
-    """
-    Extract the frozen parasite threshold from metadata.
-
-    Falls back to 0.42, which is the validation-selected threshold
-    already used by the existing predict.py.
-    """
+    """Extract parasite decision threshold from metadata."""
 
     possible_keys = [
         "threshold",
@@ -117,12 +119,18 @@ def _extract_threshold(meta: dict) -> float:
     ]
 
     for key in possible_keys:
+
         value = meta.get(key)
 
         if value is not None:
+
             try:
                 return float(value)
-            except (TypeError, ValueError):
+
+            except (
+                TypeError,
+                ValueError,
+            ):
                 pass
 
     return DEFAULT_PARASITE_THRESHOLD
@@ -134,64 +142,155 @@ def _extract_threshold(meta: dict) -> float:
 
 class MalariaPredictor:
     """
-    Two-stage malaria inference pipeline.
+    Two-stage malaria prediction system.
 
     Stage 1:
         transfer_model.keras
-        -> parasitized / uninfected
+        -> PARASITIZED / UNINFECTED
 
     Stage 2:
         species_model.keras
-        -> species, only for parasitized images
+        -> malaria species
     """
 
-    model_name = "MalariaAI Two-Stage MobileNetV2"
+    model_name = (
+        "MalariaAI Two-Stage MobileNetV2"
+    )
 
-    def __init__(self, cfg=None):
+    def __init__(
+        self,
+        cfg=None,
+    ):
+
         self.cfg = cfg
 
+        # -------------------------------------------------------------
+        # Validate model files
+        # -------------------------------------------------------------
+
         if not PARASITE_MODEL_PATH.exists():
+
             raise FileNotFoundError(
-                f"Parasite model not found: {PARASITE_MODEL_PATH}"
+                "Parasite model not found: "
+                f"{PARASITE_MODEL_PATH}"
             )
 
         if not SPECIES_MODEL_PATH.exists():
+
             raise FileNotFoundError(
-                f"Species model not found: {SPECIES_MODEL_PATH}"
+                "Species model not found: "
+                f"{SPECIES_MODEL_PATH}"
             )
 
-        print("[MalariaAI] Loading parasite detector...")
-        self.parasite_model = tf.keras.models.load_model(
-            PARASITE_MODEL_PATH,
-            compile=False,
+        # -------------------------------------------------------------
+        # Load parasite detector
+        # -------------------------------------------------------------
+
+        print(
+            "[MalariaAI] Loading parasite detector..."
         )
 
-        print("[MalariaAI] Loading species classifier...")
-        self.species_model = tf.keras.models.load_model(
-            SPECIES_MODEL_PATH,
-            compile=False,
+        self.parasite_model = (
+            tf.keras.models.load_model(
+                PARASITE_MODEL_PATH,
+                compile=False,
+            )
         )
 
-        self.parasite_meta = _read_json(PARASITE_META_PATH)
-        self.species_meta = _read_json(SPECIES_META_PATH)
+        # -------------------------------------------------------------
+        # Load species classifier
+        # -------------------------------------------------------------
 
-        self.threshold = _extract_threshold(self.parasite_meta)
+        print(
+            "[MalariaAI] Loading species classifier..."
+        )
 
-        self.species_classes = self._load_species_classes()
+        self.species_model = (
+            tf.keras.models.load_model(
+                SPECIES_MODEL_PATH,
+                compile=False,
+            )
+        )
 
-        print("[MalariaAI] Models loaded successfully.")
-        print(f"[MalariaAI] Parasite threshold: {self.threshold}")
-        print(f"[MalariaAI] Species classes: {self.species_classes}")
+        # -------------------------------------------------------------
+        # Load metadata
+        # -------------------------------------------------------------
+
+        self.parasite_meta = _read_json(
+            PARASITE_META_PATH
+        )
+
+        self.species_meta = _read_json(
+            SPECIES_META_PATH
+        )
+
+        # -------------------------------------------------------------
+        # Build preprocessing
+        # -------------------------------------------------------------
+
+        if "preprocessing" not in self.parasite_meta:
+
+            raise ValueError(
+                "Parasite model metadata does not contain "
+                "preprocessing configuration."
+            )
+
+        self.parasite_preprocessor = (
+            Preprocessor.from_metadata(
+                self.parasite_meta["preprocessing"],
+                allowed_extensions=(
+                    "png",
+                    "jpg",
+                    "jpeg",
+                ),
+                max_bytes=5 * 1024 * 1024,
+            )
+        )
+
+        # -------------------------------------------------------------
+        # Threshold
+        # -------------------------------------------------------------
+
+        self.threshold = _extract_threshold(
+            self.parasite_meta
+        )
+
+        # -------------------------------------------------------------
+        # Species classes
+        # -------------------------------------------------------------
+
+        self.species_classes = (
+            self._load_species_classes()
+        )
+
+        # -------------------------------------------------------------
+        # Startup information
+        # -------------------------------------------------------------
+
+        print(
+            "[MalariaAI] Models loaded successfully."
+        )
+
+        print(
+            "[MalariaAI] Parasite threshold: "
+            f"{self.threshold}"
+        )
+
+        print(
+            "[MalariaAI] Parasite preprocessing: "
+            f"{self.parasite_meta['preprocessing']}"
+        )
+
+        print(
+            "[MalariaAI] Species classes: "
+            f"{self.species_classes}"
+        )
 
     # -----------------------------------------------------------------
-    # Metadata
+    # Species metadata
     # -----------------------------------------------------------------
 
     def _load_species_classes(self):
-        """
-        Prefer the class order saved by training metadata.
-        Otherwise use the known training order.
-        """
 
         possible = (
             self.species_meta.get("classes")
@@ -199,8 +298,15 @@ class MalariaPredictor:
             or self.species_meta.get("species_classes")
         )
 
-        if isinstance(possible, list) and len(possible) == 4:
-            return [str(x) for x in possible]
+        if (
+            isinstance(possible, list)
+            and len(possible) == 4
+        ):
+
+            return [
+                str(x)
+                for x in possible
+            ]
 
         return SPECIES_CLASSES.copy()
 
@@ -208,70 +314,101 @@ class MalariaPredictor:
     # Parasite prediction
     # -----------------------------------------------------------------
 
-    def _predict_parasite(self, image):
-        """
-        Return parasite probability.
+    def _predict_parasite(
+        self,
+        image,
+    ):
 
-        The existing transfer_model predicts a binary malaria class.
-        We treat its single sigmoid output as the probability of
-        PARASITIZED.
-        """
-
-        prediction = self.parasite_model.predict(
-            image,
-            verbose=0,
+        prediction = (
+            self.parasite_model.predict(
+                image,
+                verbose=0,
+            )
         )
 
-        prediction = np.asarray(prediction)
+        prediction = np.asarray(
+            prediction
+        )
 
-        # Handle common binary model output formats:
-        #
-        # (1, 1) -> sigmoid probability
-        # (1,)   -> sigmoid probability
-        # (1, 2) -> softmax probability of class 1
-        if prediction.ndim == 2 and prediction.shape[1] == 2:
-            malaria_probability = float(prediction[0, 1])
+        # -------------------------------------------------------------
+        # Softmax output
+        # -------------------------------------------------------------
 
-        elif prediction.size == 1:
-            malaria_probability = float(prediction.reshape(-1)[0])
+        if (
+            prediction.ndim == 2
+            and prediction.shape[1] == 2
+        ):
 
-        else:
-            raise ValueError(
-                f"Unexpected parasite model output shape: {prediction.shape}"
+            malaria_probability = float(
+                prediction[0, 1]
             )
 
-        return float(np.clip(malaria_probability, 0.0, 1.0))
+        # -------------------------------------------------------------
+        # Sigmoid output
+        # -------------------------------------------------------------
+
+        elif prediction.size == 1:
+
+            malaria_probability = float(
+                prediction.reshape(-1)[0]
+            )
+
+        else:
+
+            raise ValueError(
+                "Unexpected parasite model "
+                f"output shape: {prediction.shape}"
+            )
+
+        return float(
+            np.clip(
+                malaria_probability,
+                0.0,
+                1.0,
+            )
+        )
 
     # -----------------------------------------------------------------
     # Species prediction
     # -----------------------------------------------------------------
 
-    def _predict_species(self, image):
-        """
-        Predict one of:
+    def _predict_species(
+        self,
+        image,
+    ):
 
-            Falciparum
-            Malariae
-            Ovale
-            Vivax
-        """
-
-        prediction = self.species_model.predict(
-            image,
-            verbose=0,
+        prediction = (
+            self.species_model.predict(
+                image,
+                verbose=0,
+            )
         )
 
-        prediction = np.asarray(prediction)
+        prediction = np.asarray(
+            prediction
+        )
 
-        if prediction.ndim != 2 or prediction.shape[1] != 4:
+        if (
+            prediction.ndim != 2
+            or prediction.shape[1] != 4
+        ):
+
             raise ValueError(
-                f"Unexpected species model output shape: {prediction.shape}"
+                "Unexpected species model "
+                f"output shape: {prediction.shape}"
             )
 
         probabilities = prediction[0]
 
-        index = int(np.argmax(probabilities))
-        probability = float(probabilities[index])
+        index = int(
+            np.argmax(
+                probabilities
+            )
+        )
+
+        probability = float(
+            probabilities[index]
+        )
 
         return (
             self.species_classes[index],
@@ -280,71 +417,98 @@ class MalariaPredictor:
         )
 
     # -----------------------------------------------------------------
-    # Public API
+    # Public prediction API
     # -----------------------------------------------------------------
 
-    def predict(self, image_bytes: bytes) -> dict:
+    def predict(
+        self,
+        image_bytes: bytes,
+    ) -> dict:
         """
-        Main Predictor contract used by Flask.
-
-        Returns:
-            prediction
-            malaria_probability
-            threshold
-            model
-            model_version
-            species
-            species_probability
+        Run the complete two-stage prediction pipeline.
         """
 
-        image = _load_image(image_bytes)
+        image = _load_image(
+            image_bytes,
+            self.parasite_preprocessor,
+        )
 
         # -------------------------------------------------------------
         # Stage 1: parasite detection
         # -------------------------------------------------------------
 
-        malaria_probability = self._predict_parasite(image)
+        malaria_probability = (
+            self._predict_parasite(
+                image
+            )
+        )
 
-        is_parasitized = malaria_probability >= self.threshold
+        is_parasitized = (
+            malaria_probability
+            >= self.threshold
+        )
 
-        if is_parasitized:
-            prediction = "PARASITIZED"
-        else:
-            prediction = "UNINFECTED"
+        prediction = (
+            "PARASITIZED"
+            if is_parasitized
+            else "UNINFECTED"
+        )
 
         result = {
+
             "prediction": prediction,
-            "malaria_probability": round(malaria_probability, 6),
+
+            "malaria_probability": round(
+                malaria_probability,
+                6,
+            ),
+
             "threshold": self.threshold,
-            "model": "MobileNetV2 transfer_model",
-            "model_version": self.parasite_meta.get(
-                "model_version",
-                "transfer_model",
+
+            "model": (
+                "MobileNetV2 transfer_model"
+            ),
+
+            "model_version": (
+                self.parasite_meta.get(
+                    "model_version",
+                    "transfer_model",
+                )
             ),
         }
 
         # -------------------------------------------------------------
         # Stage 2: species classification
-        #
-        # IMPORTANT:
-        # Only classify species after parasite detection.
         # -------------------------------------------------------------
 
         if is_parasitized:
 
-            species, species_probability, species_probabilities = (
-                self._predict_species(image)
+            (
+                species,
+                species_probability,
+                species_probabilities,
+            ) = self._predict_species(
+                image
             )
 
             result["species"] = species
-            result["species_probability"] = round(
-                species_probability,
-                6,
+
+            result["species_probability"] = (
+                round(
+                    species_probability,
+                    6,
+                )
             )
 
-            # Useful for API/debugging.
-            result["species_probabilities"] = {
-                name: round(float(prob), 6)
+            result[
+                "species_probabilities"
+            ] = {
+
+                name: round(
+                    float(prob),
+                    6,
+                )
+
                 for name, prob in zip(
                     self.species_classes,
                     species_probabilities,
@@ -352,38 +516,117 @@ class MalariaPredictor:
             }
 
         else:
+
             result["species"] = None
-            result["species_probability"] = None
+
+            result[
+                "species_probability"
+            ] = None
 
         return result
 
     # -----------------------------------------------------------------
-    # Optional explainability
+    # Grad-CAM
     # -----------------------------------------------------------------
 
-    def explain(self, image_bytes: bytes):
+    def explain(
+        self,
+        image_bytes: bytes,
+    ):
         """
-        Placeholder for Grad-CAM.
+        Generate Grad-CAM explanation.
 
-        The Flask application already treats explain() as optional.
-        Returning None means the application can run normally without
-        Grad-CAM integration.
+        Returns:
 
-        We intentionally do not fabricate a heatmap.
+            {
+                "original": base64 PNG,
+                "heatmap": base64 PNG,
+                "overlay": base64 PNG
+            }
         """
 
-        return None
+        from src.explainability.gradcam import (
+            make_gradcam_heatmap,
+            save_gradcam,
+        )
+
+        # -------------------------------------------------------------
+        # Preprocess exactly like prediction
+        # -------------------------------------------------------------
+
+        image = _load_image(
+            image_bytes,
+            self.parasite_preprocessor,
+        )
+
+        # -------------------------------------------------------------
+        # Generate Grad-CAM
+        #
+        # IMPORTANT:
+        #
+        # make_gradcam_heatmap() signature is:
+        #
+        #     make_gradcam_heatmap(
+        #         image_tensor,
+        #         model,
+        #         conv_layer_name,
+        #     )
+        #
+        # Verified MobileNetV2 feature layer:
+        #
+        #     out_relu
+        # -------------------------------------------------------------
+
+        heatmap = make_gradcam_heatmap(
+            image,
+            self.parasite_model,
+            "out_relu",
+        )
+
+        # -------------------------------------------------------------
+        # Output directory
+        # -------------------------------------------------------------
+
+        output_dir = (
+            PROJECT_ROOT
+            / "reports"
+            / "explainability"
+        )
+
+        output_dir.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        output_path = (
+            output_dir
+            / "flask_gradcam.png"
+        )
+
+        # -------------------------------------------------------------
+        # Create overlay
+        # -------------------------------------------------------------
+
+        result = save_gradcam(
+            image_bytes,
+            heatmap,
+            output_path,
+        )
+
+        return result
 
 
 # ---------------------------------------------------------------------
-# Factory expected by app.py
+# Factory
 # ---------------------------------------------------------------------
 
-def build_predictor(cfg=None):
+def build_predictor(
+    cfg=None,
+):
     """
-    Factory used by:
-
-        from src.inference.predictor import build_predictor
+    Factory used by app.py.
     """
 
-    return MalariaPredictor(cfg)
+    return MalariaPredictor(
+        cfg
+    )

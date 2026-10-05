@@ -1,6 +1,73 @@
 {
   "split": "val",
   "models": {
+    "custom_cnn": {
+      "images": 3868,
+      "patients": 28,
+      "parasitized": 1945,
+      "roc_auc": 0.9798245297421151,
+      "pr_auc": 0.9798731903102667,
+      "threshold_selected": 0.44,
+      "at_selected_threshold": {
+        "threshold": 0.44,
+        "accuracy": 0.9294208893485005,
+        "precision": 0.9122287968441815,
+        "recall": 0.9511568123393316,
+        "sensitivity": 0.9511568123393316,
+        "specificity": 0.907436297451898,
+        "f1": 0.9312861817266549,
+        "tp": 1850,
+        "fp": 178,
+        "tn": 1745,
+        "fn": 95
+      },
+      "at_0.5": {
+        "threshold": 0.5,
+        "accuracy": 0.9307135470527405,
+        "precision": 0.9173718267794922,
+        "recall": 0.9475578406169666,
+        "sensitivity": 0.9475578406169666,
+        "specificity": 0.9136765470618825,
+        "f1": 0.9322205361659078,
+        "tp": 1843,
+        "fp": 166,
+        "tn": 1757,
+        "fn": 102
+      },
+      "ci95_patient_bootstrap": {
+        "roc_auc": {
+          "lo": 0.9696458844189659,
+          "hi": 0.9867754734084351
+        },
+        "pr_auc": {
+          "lo": 0.950096750578607,
+          "hi": 0.9903363869651624
+        },
+        "accuracy": {
+          "lo": 0.8875357784116066,
+          "hi": 0.9598322141531517
+        },
+        "sensitivity": {
+          "lo": 0.9310905137928093,
+          "hi": 0.9695574193351033
+        },
+        "specificity": {
+          "lo": 0.8264983969902189,
+          "hi": 0.9657775303967289
+        },
+        "precision": {
+          "lo": 0.7898137587993157,
+          "hi": 0.9703734552753448
+        },
+        "f1": {
+          "lo": 0.8635264574089275,
+          "hi": 0.9621682005580311
+        },
+        "n_valid_resamples": 1000,
+        "n_patients": 28
+      },
+      "note": "threshold was selected on this same data, so results at the selected threshold are optimistic"
+    },
     "transfer_model": {
       "images": 3868,
       "patients": 28,

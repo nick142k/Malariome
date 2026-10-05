@@ -1,0 +1,87 @@
+{
+  "url": "http://localhost:5000",
+  "probability_vs_evaluation": {
+    "n": 20,
+    "max_abs_diff": 1.7999999999407379e-06,
+    "mean_abs_diff": 3.998549999931298e-07,
+    "within_tolerance": 20,
+    "tolerance": 0.001,
+    "all_match": true
+  },
+  "accuracy_on_sample": 0.95,
+  "species_distribution_on_parasitized_calls": {
+    "Vivax": 9
+  },
+  "latency_ms": {
+    "mean": 2421.688924996124,
+    "max": 5660.410700002103
+  },
+  "checks": [
+    {
+      "check": "health endpoint",
+      "passed": true,
+      "detail": "{'model_loaded': True, 'status': 'healthy'}"
+    },
+    {
+      "check": "page /",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "check": "page /history",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "check": "page /model",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "check": "page /about",
+      "passed": true,
+      "detail": "HTTP 200"
+    },
+    {
+      "check": "API answered every request",
+      "passed": true,
+      "detail": "20/20 succeeded"
+    },
+    {
+      "check": "probabilities in [0, 1]",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "decision matches threshold",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "species absent for UNINFECTED",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "check": "app probability equals evaluation probability for the same images",
+      "passed": true,
+      "detail": "max diff 0.0000, mean diff 0.0000, 20/20 within 0.001"
+    },
+    {
+      "check": "garbage file rejected (400)",
+      "passed": true,
+      "detail": "HTTP 400"
+    },
+    {
+      "check": "wrong extension rejected (415)",
+      "passed": true,
+      "detail": "HTTP 415"
+    },
+    {
+      "check": "missing 'image' field rejected (400)",
+      "passed": true,
+      "detail": "HTTP 400"
+    }
+  ],
+  "all_passed": true
+}
